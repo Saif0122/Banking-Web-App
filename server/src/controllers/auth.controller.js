@@ -9,11 +9,10 @@ import { sendResponse } from '../utils/response.js';
  * Helper to set access and refresh token HTTP-Only cookies.
  */
 const setTokenCookies = (res, accessToken, refreshToken) => {
-  const isProd = process.env.NODE_ENV === 'production';
   const cookieOptions = {
     httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    secure: true,
+    sameSite: 'none',
     path: '/'
   };
 
@@ -270,11 +269,10 @@ export const changePassword = async (req, res, next) => {
  */
 export const logout = async (req, res, next) => {
   try {
-    const isProd = process.env.NODE_ENV === 'production';
     const cookieOptions = {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'none',
       path: '/'
     };
 
@@ -308,11 +306,10 @@ export const logout = async (req, res, next) => {
  */
 export const logoutAllDevices = async (req, res, next) => {
   try {
-    const isProd = process.env.NODE_ENV === 'production';
     const cookieOptions = {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'none',
       path: '/'
     };
 

@@ -24,7 +24,8 @@ const server = app.listen(PORT, () => {
   console.log(`✓ Backend Running`);
   console.log(`✓ Port Listening: ${PORT}`);
   console.log(`✓ Environment: ${process.env.NODE_ENV}`);
-  console.log(`✓ Allowed Origin: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
+  const allowedOrigin = (process.env.CLIENT_URL || 'http://localhost:3000').replace(/\/$/, '');
+  console.log(`✓ Allowed Origin: ${allowedOrigin}`);
   console.log(`✓ Auth Route Registered: /api/v1/auth/register`);
   console.log(`✓ Health Route Registered: /api/v1/health`);
   console.log(`✓ Registered Base Routes: /api/v1/* (auth, health, accounts, transactions, admin, dashboard)`);

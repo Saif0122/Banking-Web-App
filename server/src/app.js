@@ -30,12 +30,26 @@ app.use(helmet({
 }));
 
 // Enable CORS
-const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:3000';
+const rawOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:3000', 'https://banking-web-app-theta.vercel.app'];
+const allowedOrigins = rawOrigins.map(origin => origin.trim().replace(/\/+$/, ''));
+
 app.use(cors({
-  origin: allowedOrigin,
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // remove trailing slash from incoming origin just in case, though browsers don't usually send it
+    const cleanOrigin = origin.replace(/\/+$/, '');
+
+    if (allowedOrigins.indexOf(cleanOrigin) === -1) {
+      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
 // HTTP request logger middleware

@@ -35,6 +35,8 @@ export const useCurrentUser = (enabled: boolean = true) => {
     queryFn: authApi.getCurrentUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: false, // Don't retry if failing (e.g. 401)
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     enabled,
   });
 };

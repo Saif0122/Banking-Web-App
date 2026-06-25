@@ -11,6 +11,9 @@ import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js
 
 const app = express();
 
+// Trust proxy for Render load balancer
+app.set('trust proxy', 1);
+
 // Set HTTP Security Headers
 app.use(helmet({
   contentSecurityPolicy: {

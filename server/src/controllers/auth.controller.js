@@ -13,7 +13,8 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
   const cookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax'
+    sameSite: isProd ? 'none' : 'lax',
+    path: '/'
   };
 
   if (accessToken) {
@@ -273,7 +274,8 @@ export const logout = async (req, res, next) => {
     const cookieOptions = {
       httpOnly: true,
       secure: isProd,
-      sameSite: isProd ? 'none' : 'lax'
+      sameSite: isProd ? 'none' : 'lax',
+      path: '/'
     };
 
     res.clearCookie('accessToken', cookieOptions);
@@ -310,7 +312,8 @@ export const logoutAllDevices = async (req, res, next) => {
     const cookieOptions = {
       httpOnly: true,
       secure: isProd,
-      sameSite: isProd ? 'none' : 'lax'
+      sameSite: isProd ? 'none' : 'lax',
+      path: '/'
     };
 
     res.clearCookie('accessToken', cookieOptions);

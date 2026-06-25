@@ -20,14 +20,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   
-  // Use a localStorage hint to avoid unnecessary /auth/me calls when explicitly logged out
-  const [hasToken, setHasToken] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("authHint") === "true";
-    }
-    return false;
-  });
-  
+  // Assume we might have a token via HttpOnly cookies. 
+  // If the `/me` endpoint fails, hasToken will be set to false.
+  const [hasToken, setHasToken] = useState<boolean>(true);
   const [isInitialized, setIsInitialized] = useState<boolean>(true);
   const { data: user, isLoading: isUserLoading, error } = useCurrentUser(hasToken);
   const loginMutation = useLogin();
@@ -36,20 +31,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // If there's an error fetching the user (e.g. 401), we clear the token state
   useEffect(() => {
     if (error) {
-      if (typeof window !== "undefined") localStorage.removeItem("authHint");
       setTimeout(() => setHasToken(false), 0);
     }
   }, [error]);
 
   const login = async (data: LoginPayload) => {
     await loginMutation.mutateAsync(data);
-    if (typeof window !== "undefined") localStorage.setItem("authHint", "true");
     setHasToken(true);
   };
 
   const register = async (data: RegisterPayload) => {
     await registerMutation.mutateAsync(data);
-    if (typeof window !== "undefined") localStorage.setItem("authHint", "true");
     setHasToken(true);
   };
 
@@ -61,7 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
-      if (typeof window !== "undefined") localStorage.removeItem("authHint");
       setHasToken(false);
       router.push("/login");
     }

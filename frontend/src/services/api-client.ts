@@ -28,42 +28,17 @@ apiClient.interceptors.request.use(
   }
 );
 
-let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: any) => void }> = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/register');
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthEndpoint) {
-      // If we are already refreshing, queue the request
-      if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return apiClient(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
-
+    // Handle 401 Unauthorized errors to attempt a token refresh
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
-      isRefreshing = true;
+
       console.log("REFRESHING TOKEN");
 
       try {
@@ -72,14 +47,13 @@ apiClient.interceptors.response.use(
           {},
           { withCredentials: true }
         );
-        isRefreshing = false;
-        processQueue(null);
+
+        // Retry the original request (new cookies will be sent automatically)
         return apiClient(originalRequest);
       } catch (refreshError) {
-        isRefreshing = false;
-        processQueue(refreshError, null);
-        // Do NOT use window.location.href here, as it causes infinite reload loops.
-        // The frontend AuthProvider will catch the error and handle state/routing.
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
         return Promise.reject(refreshError);
       }
     }
